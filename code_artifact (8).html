@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕌 لعبة رحلتي إلى المسجد التعليمية</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            850: '#064e3b',
+                            950: '#022c22'
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309'
+                        }
+                    },
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #064e3b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .islamic-pattern {
+            background-image: radial-gradient(rgba(217, 119, 6, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .gold-border {
+            border: 2px solid #f59e0b;
+        }
+
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+            color: #ffffff;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: #ffffff;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .btn-emerald:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #059669;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="islamic-pattern flex flex-col justify-between min-h-screen p-2 md:p-4">
+
+    <header class="w-full max-w-5xl mx-auto mb-4">
+        <div class="glass-panel rounded-2xl p-3 md:p-4 flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Player Info & Avatar -->
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div id="header-avatar" class="w-12 h-12 rounded-full bg-emerald-700 border-2 border-amber-400 flex items-center justify-center text-2xl shadow-inner">
+                    👦
+                </div>
+                <div>
+                    <h2 id="header-name" class="font-bold text-lg text-amber-300 leading-none">زائر المسجد</h2>
+                    <span id="header-level" class="text-xs text-emerald-300 font-semibold bg-emerald-950 px-2.5 py-0.5 rounded-full inline-block mt-1">
+                        🌱 المستوى 1: زائر المسجد
+                    </span>
+                </div>
+            </div>
+
+            <!-- Game Stats -->
+            <div class="flex items-center space-x-4 space-x-reverse text-sm font-bold">
+                <div class="flex items-center space-x-1.5 space-x-reverse bg-amber-950/60 border border-amber-500/40 px-3 py-1.5 rounded-xl text-amber-300">
+                    <span>🏆 النقاط:</span>
+                    <span id="header-score" class="text-base text-amber-400">0</span>
+                </div>
+                <div class="flex items-center space-x-1.5 space-x-reverse bg-emerald-950/60 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-emerald-300">
+                    <span>🏅 الشارات:</span>
+                    <span id="header-badges-count" class="text-base text-emerald-400">0 / 5</span>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <button id="btn-achievements" title="الإنجازات" class="bg-slate-800 hover:bg-slate-700 border border-amber-500/40 p-2 rounded-xl text-lg transition">
+                    🏅
+                </button>
+                <button id="btn-sound" title="الصوت" class="bg-slate-800 hover:bg-slate-700 border border-amber-500/40 p-2 rounded-xl text-lg transition">
+                    🔊
+                </button>
+                <button id="btn-reset-confirm" title="إعادة ضبط التقدم" class="bg-red-950/80 hover:bg-red-900 border border-red-500/40 p-2 rounded-xl text-lg text-red-300 transition">
+                    🗑️
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progress-container" class="mt-2 bg-slate-900/80 border border-slate-700 rounded-full h-3.5 overflow-hidden p-0.5 hidden">
+            <div id="progress-bar" class="bg-gradient-to-l from-amber-400 to-emerald-500 h-full rounded-full transition-all duration-500 w-0"></div>
+        </div>
+    </header>
+
+    <main id="app-container" class="w-full max-w-5xl mx-auto flex-1 flex flex-col justify-center items-center relative">
+        
+        <!-- ==================== SCREEN 0: WELCOME & START ==================== -->
+        <section id="screen-welcome" class="w-full glass-panel rounded-3xl p-6 md:p-10 text-center flex flex-col items-center justify-center my-auto relative overflow-hidden">
+            <div class="absolute -top-12 -left-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
+
+            <div class="text-6xl md:text-8xl mb-4 text-amber-400 animate-bounce">
+                🕌
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-500 mb-3">
+                رحلتي إلى المسجد
+            </h1>
+            <p class="text-base md:text-xl text-emerald-200 mb-8 max-w-xl font-medium">
+                مغامرة تعليمية تفاعلية لاكتشاف آداب المسجد، والسلوكيات الحسنة، وعمارة المساجد بالطهارة والوقار
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+                <button id="btn-start-game" class="btn-gold py-4 px-6 rounded-2xl text-lg flex items-center justify-center space-x-2 space-x-reverse font-bold shadow-lg">
+                    <span>🚀 ابدأ الرحلة</span>
+                </button>
+                <button id="btn-how-to-play" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 py-4 px-6 rounded-2xl text-lg flex items-center justify-center space-x-2 space-x-reverse font-bold transition">
+                    <span>📖 طريقة اللعب</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== SETUP MODAL: AVATAR & DIFFICULTY ==================== -->
+        <section id="screen-setup" class="w-full glass-panel rounded-3xl p-6 md:p-8 text-center max-w-2xl hidden">
+            <h2 class="text-2xl md:text-3xl font-extrabold text-amber-300 mb-6">
+                ⚙️ إعدادات الرحلة
+            </h2>
+
+            <form id="form-setup" onsubmit="return false;" class="space-y-6 text-right">
+                <!-- Player Name -->
+                <div>
+                    <label class="block text-emerald-200 text-sm font-bold mb-2">اسم البطل / البطلة:</label>
+                    <input type="text" id="input-player-name" required placeholder="أدخل اسمك هنا..." maxlength="20"
+                           class="w-full bg-slate-900/90 border border-amber-500/50 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-amber-400 text-right">
+                </div>
+
+                <!-- Avatar Pick -->
+                <div>
+                    <label class="block text-emerald-200 text-sm font-bold mb-2">اختر الشخصية:</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" data-avatar="👦" class="avatar-option p-4 rounded-2xl border-2 border-emerald-600 bg-slate-900/60 hover:bg-emerald-950 flex flex-col items-center transition active-avatar">
+                            <span class="text-5xl mb-2">👦</span>
+                            <span class="font-bold text-amber-300">ولد</span>
+                        </button>
+                        <button type="button" data-avatar="👧" class="avatar-option p-4 rounded-2xl border-2 border-slate-700 bg-slate-900/60 hover:bg-emerald-950 flex flex-col items-center transition">
+                            <span class="text-5xl mb-2">👧</span>
+                            <span class="font-bold text-amber-300">بنت</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Difficulty Pick -->
+                <div>
+                    <label class="block text-emerald-200 text-sm font-bold mb-2">اختر الفئة العمرية (مستوى التحدي):</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" data-diff="easy" class="diff-option p-3 rounded-xl border-2 border-emerald-500 bg-emerald-950/60 text-center transition active-diff">
+                            <div class="text-2xl mb-1">🟢</div>
+                            <div class="font-bold text-sm text-emerald-300">سهل</div>
+                            <div class="text-xs text-slate-400">10-12 سنة</div>
+                        </button>
+                        <button type="button" data-diff="medium" class="diff-option p-3 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition">
+                            <div class="text-2xl mb-1">🟡</div>
+                            <div class="font-bold text-sm text-amber-300">متوسط</div>
+                            <div class="text-xs text-slate-400">13-15 سنة</div>
+                        </button>
+                        <button type="button" data-diff="hard" class="diff-option p-3 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition">
+                            <div class="text-2xl mb-1">🔴</div>
+                            <div class="font-bold text-sm text-red-300">متقدم</div>
+                            <div class="text-xs text-slate-400">16-17 سنة</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between gap-3">
+                    <button type="button" id="btn-back-to-welcome" class="w-1/3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl py-3 font-bold text-slate-300">
+                        رجوع
+                    </button>
+                    <button type="button" id="btn-confirm-setup" class="w-2/3 btn-gold py-3 rounded-xl font-bold text-lg">
+                        الانطلاق الآن 🎯
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ==================== GAME STAGES CANVAS ==================== -->
+        <section id="screen-game" class="w-full glass-panel rounded-3xl p-4 md:p-8 flex flex-col min-h-[500px] hidden">
+            
+            <!-- Stage Title & Hint Bar -->
+            <div class="flex flex-wrap items-center justify-between border-b border-amber-500/30 pb-3 mb-4 gap-2">
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <span id="stage-icon" class="text-3xl">🏠</span>
+                    <h2 id="stage-title" class="text-xl md:text-2xl font-extrabold text-amber-300">المرحلة 1: الاستعداد</h2>
+                </div>
+                <button id="btn-hint" class="bg-amber-950/80 hover:bg-amber-900 border border-amber-500/60 px-3 py-1.5 rounded-xl text-amber-300 text-sm font-bold flex items-center space-x-1.5 space-x-reverse transition">
+                    <span>💡 تلميح</span>
+                    <span class="text-xs bg-amber-900 px-1.5 py-0.5 rounded-md text-amber-200">(-5 نقاط)</span>
+                </button>
+            </div>
+
+            <!-- Dynamic Content View Area -->
+            <div id="stage-viewport" class="flex-1 flex flex-col justify-center items-center w-full">
+                <!-- Content generated dynamically via JavaScript -->
+            </div>
+
+            <!-- Navigation Footer inside Game -->
+            <div id="stage-footer" class="mt-6 pt-3 border-t border-slate-800 flex justify-between items-center hidden">
+                <button id="btn-prev-stage" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm font-bold">
+                    السابق
+                </button>
+                <button id="btn-next-stage" class="btn-emerald px-6 py-2.5 rounded-xl text-base font-bold shadow-md">
+                    المرحلة التالية ➔
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN: RESULTS ==================== -->
+        <section id="screen-results" class="w-full glass-panel rounded-3xl p-6 md:p-10 text-center max-w-3xl hidden">
+            <div class="text-6xl mb-4 animate-bounce">🏆</div>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-amber-300 mb-2">أحسنت واكتملت الرحلة!</h2>
+            <p id="results-subtitle" class="text-emerald-200 text-lg mb-6">لقد تعلمت آداب المسجد وأظهرت سلوكاً رائعاً</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div class="bg-slate-900/80 border border-amber-500/30 p-3 rounded-2xl">
+                    <div class="text-xs text-slate-400 mb-1">مجموع النقاط</div>
+                    <div id="res-score" class="text-2xl font-bold text-amber-400">0</div>
+                </div>
+                <div class="bg-slate-900/80 border border-amber-500/30 p-3 rounded-2xl">
+                    <div class="text-xs text-slate-400 mb-1">الشارات المكتسبة</div>
+                    <div id="res-badges" class="text-2xl font-bold text-emerald-400">0</div>
+                </div>
+                <div class="bg-slate-900/80 border border-amber-500/30 p-3 rounded-2xl">
+                    <div class="text-xs text-slate-400 mb-1">دقة الإجابات</div>
+                    <div id="res-accuracy" class="text-2xl font-bold text-cyan-400">0%</div>
+                </div>
+                <div class="bg-slate-900/80 border border-amber-500/30 p-3 rounded-2xl">
+                    <div class="text-xs text-slate-400 mb-1">المستوى المحقق</div>
+                    <div id="res-level" class="text-sm font-bold text-yellow-300 mt-1">زائر المسجد</div>
+                </div>
+            </div>
+
+            <!-- Educational Tip Box -->
+            <div class="bg-emerald-950/70 border border-emerald-500/40 p-4 rounded-2xl text-right mb-8">
+                <h4 class="font-bold text-amber-300 mb-1 flex items-center space-x-2 space-x-reverse">
+                    <span>💡 وصية تربوية:</span>
+                </h4>
+                <p id="res-pedagogy-tip" class="text-emerald-100 text-sm leading-relaxed">
+                    تذكر دائماً أن المسجد هو بيت الله، وأن التحلي بالهدوء والنظافة والسكينة يضاعف أجرك ويجعل تجربة الصلاة مليئة بالخشوع والاطمئنان.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="btn-restart-game" class="btn-gold py-3 px-8 rounded-xl font-bold text-lg">
+                    🔄 إعادات الرحلة
+                </button>
+                <button id="btn-results-main" class="bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 px-8 rounded-xl font-bold text-lg">
+                    القائمة الرئيسية 🏠
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== MODAL: ACHIEVEMENTS (إنجازاتي) ==================== -->
+        <div id="modal-achievements" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 text-right relative border-2 border-amber-500/50">
+                <button id="close-modal-achievements" class="absolute top-4 left-4 text-slate-400 hover:text-white text-2xl font-bold">✕</button>
+                <h3 class="text-2xl font-extrabold text-amber-300 mb-4 flex items-center space-x-2 space-x-reverse">
+                    <span>🏅 قائمة إنجازاتي وشاراتي</span>
+                </h3>
+
+                <div id="badges-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto p-1">
+                    <!-- Dynamic badges populated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL: HOW TO PLAY (طريقة اللعب) ==================== -->
+        <div id="modal-how" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 text-right relative border-2 border-amber-500/50">
+                <button id="close-modal-how" class="absolute top-4 left-4 text-slate-400 hover:text-white text-2xl font-bold">✕</button>
+                <h3 class="text-2xl font-extrabold text-amber-300 mb-4">📖 طريقة اللعب والتعليمات</h3>
+                
+                <div class="space-y-3 text-slate-200 text-sm leading-relaxed max-h-[60vh] overflow-y-auto pl-2">
+                    <p class="bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        🎯 <strong class="text-amber-300">الهدف:</strong> إنهاء رحلتك الافتراضية إلى المسجد بنجاح مع تطبيق كافة السلوكيات والآداب الإسلامية الصحيحة.
+                    </p>
+                    <p class="bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        ⭐ <strong class="text-amber-300">النقاط:</strong> تحصل على 10 نقاط لكل إجابة صحيحة، و20 نقطة عند إكمال المرحلة، و50 نقطة للاختبار النهائي!
+                    </p>
+                    <p class="bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        💡 <strong class="text-amber-300">التلميح:</strong> إذا صعب عليك سؤال، يمكنك استخدام زر التلميح ويخصم منك 5 نقاط فقط.
+                    </p>
+                    <p class="bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        🏅 <strong class="text-amber-300">الشارات:</strong> تجمع 5 شارات مميزة بناءً على دقة اختياراتك ونظافتك وهدوئك داخل المسجد.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL: FEEDBACK POPUP ==================== -->
+        <div id="modal-feedback" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div id="feedback-box" class="glass-panel w-full max-w-md rounded-3xl p-6 text-center border-2 border-amber-500">
+                <div id="feedback-icon" class="text-5xl mb-3">✅</div>
+                <h3 id="feedback-title" class="text-2xl font-extrabold text-amber-300 mb-2">إجابة صحيحة!</h3>
+                <p id="feedback-msg" class="text-slate-200 text-sm leading-relaxed mb-6">توضيح تربوي تعليمي للموقف...</p>
+                <button id="btn-feedback-continue" class="btn-gold py-2.5 px-8 rounded-xl font-bold">
+                    متابعة ➔
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL: RESET CONFIRMATION ==================== -->
+        <div id="modal-confirm-reset" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="glass-panel w-full max-w-sm rounded-3xl p-6 text-center border-2 border-red-500">
+                <div class="text-5xl mb-3">⚠️</div>
+                <h3 class="text-xl font-extrabold text-red-400 mb-2">إعادة ضبط التقدم</h3>
+                <p class="text-slate-300 text-sm mb-6">هل أنت تأكد من رغبتك في حذف جميع نقاطك وشاراتك والبدء من جديد؟</p>
+                <div class="flex space-x-3 space-x-reverse justify-center">
+                    <button id="btn-cancel-reset" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-2 rounded-xl font-bold">إلغاء</button>
+                    <button id="btn-do-reset" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl font-bold">نعم، احذف</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        
+        // --- BADGES DATA ---
+        const BADGES_DEFINITIONS = [
+            { id: 'badgeCleanliness', title: 'شارة النظافة', icon: '🧼', desc: 'اختيار ملابس وطهارة مناسبة قبل الخروج' },
+            { id: 'badgeQuiet', title: 'شارة الهدوء', icon: '🤫', desc: 'الالتزام بالهدوء والوقار في الطريق والدخول' },
+            { id: 'badgeRespect', title: 'شارة احترام الآخرين', icon: '🤝', desc: 'مساعدة الناس وعدم إزعاج المصلين' },
+            { id: 'badgePreservation', title: 'شارة المحافظة على المسجد', icon: '🕌', desc: 'استكشاف مرافق المسجد والعناية بنظافتها' },
+            { id: 'badgeAmbassador', title: 'شارة سفير آداب المسجد', icon: '🏆', desc: 'اجتياز الاختبار النهائي بنسبة 80% أو أكثر' }
+        ];
+
+        // --- STAGE 1: PREPARATION ITEMS ---
+        const STAGE1_ITEMS = [
+            { id: 1, name: 'ثوب نظيف ومناسب', icon: '👕', correct: true, reason: 'من السنة لبس الثياب النظيفة والحسنة عند الذهاب للمسجد.' },
+            { id: 2, name: 'سواك / عطر هادئ', icon: '🌿', correct: true, reason: 'تطيب الرائحة بالمسك واستعمال السواك يطيب الفم ويعجب الملائكة والمصلين.' },
+            { id: 3, name: 'حذاء مريح', icon: '👟', correct: true, reason: 'الحذاء المناسب يساعدك على المشي بوقار وسكينة.' },
+            { id: 4, name: 'مصحف شخصي / سجادة', icon: '📖', correct: true, reason: 'ممتاز لقراءة القرآن والصلاة بنظافة وأدب.' },
+            { id: 5, name: 'طعام فيه بصل أو ثوم', icon: '🧄', correct: false, reason: 'نهى النبي ﷺ عن دخول المسجد لمن أكل بطلاً أو ثوماً بسبب الرائحة الكريهة التي تؤذي المصلين.' },
+            { id: 6, name: 'ألعاب ومكبرات صوت', icon: '🎮', correct: false, reason: 'الألعاب وأجهزة الصوت تسبب الإزعاج وتنافي الوقار والخشوع في المسجد.' },
+            { id: 7, name: 'حقيبة مدرسية ثقيلة جداً', icon: '🎒', correct: false, reason: 'من الأفضل ترك الأغراض الثقيلة غير الضرورية لتتحرك بسهولة وهدوء.' },
+            { id: 8, name: 'وجبات سريعة ومشروبات', icon: '🍔', correct: false, reason: 'المسجد مكان للصلاة والذكر وليس للأكل وتلويث السجاد.' }
+        ];
+
+        // --- STAGE 2: ROAD TO MOSQUE ENCOUNTERS ---
+        const STAGE2_ENCOUNTERS = [
+            {
+                situation: 'أثناء مشيك في الشارع اتجاه المسجد، رأيت زجاجة مكسورة أو قشرة موز على الرصيف.',
+                hint: 'إماطة الأذى عن الطريق صدقة وسلوك إسلامي نبيل.',
+                options: [
+                    { text: 'أرفع الأذى بهدوء وأضعه في سلة المهملات', correct: true, feedback: 'رائع! إماطة الأذى عن الطريق من الإيمان وتؤجر عليها.' },
+                    { text: 'أتجاهلها وأكمل طريقي سريعاً', correct: false, feedback: 'ينبغي للمسلم المبادرة بنفع الناس وإزالة ما يؤذيهم.' },
+                    { text: 'أركلها بقدمي بعيداً', correct: false, feedback: 'قد تؤذي غيرك بركلها، الأفضل حملها ووضعها في سلة المهملات.' }
+                ]
+            },
+            {
+                situation: 'سمعت أذان الصلاة وأنت في الطريق.',
+                hint: 'الدعاء واستحضار عظمة الأذان والمشي بسكينة.',
+                options: [
+                    { text: 'أبدأ بالركض والجري السريع لألحق الصلاة', correct: false, feedback: 'قال النبي ﷺ: «إذا أتيتم الصلاة فعليكم بالسكينة، فما أدركتم فصلوا وما فاتكم فأتموا».' },
+                    { text: 'أمشي بوقار وسكينة وأردد مع المؤذن', correct: true, feedback: 'ممتاز! المشي بوقار والترديد مع المؤذن يملأ قلبك بالسكينة.' },
+                    { text: 'أتوقف للتحدث بصوت مرتفع مع أصدقائي', correct: false, feedback: 'وقت الأذان هو وقت الاستعداد والتوجه إلى الصلاة بكل اهتمام.' }
+                ]
+            },
+            {
+                situation: 'صادفت رجلاً مسناً يحاول عبور الطريق بأمان.',
+                hint: 'احترام الكبير ومساعدته من أخلاق المسلم.',
+                options: [
+                    { text: 'ألقي عليه السلام وأعرض عليه المساعدة برفبان', correct: true, feedback: 'أحسنت! إعانة الضعيف والكبير من شيم المسلم وتزيد أجر رحلتك للمسجد.' },
+                    { text: 'أتجاوزه بسرعة لأسبقه للمسجد', correct: false, feedback: 'مساعدة الآخرين لا تعطلك عن الخير بل تضاعف حسناتك.' }
+                ]
+            }
+        ];
+
+        // --- STAGE 3: AT MOSQUE GATE ---
+        const STAGE3_QUESTIONS = [
+            {
+                question: 'وصلت إلى باب المسجد، ما هو السلوك الصحيح قبل الخطو للداخل؟',
+                hint: 'فحص نظافة الجوارب والحذاء وتذكر دعاء الدخول.',
+                options: [
+                    { text: 'أنزع الحذاء بانتظام وأضعه في الرف المخصص، وأدخل بالقدم اليمنى', correct: true, feedback: 'ممتاز! البدء باليمين ووضع الأحذية في مكانها يحافظ على نظام بيت الله ونظافته.' },
+                    { text: 'أخلع حذائي وأتركه أمام الباب مباشرة لأدخل سريعاً', correct: false, feedback: 'ترك الأحذية عند الباب يعرقل المصلين ويجعل المظهر غير لائق.' },
+                    { text: 'أدخل بالقدم اليسرى مع الركض', correct: false, feedback: 'السنة الدخول بالقدم اليمنى وبسكينة.' }
+                ]
+            },
+            {
+                question: 'ما هو الدعاء المأثور الذي يُسن قوله عند دخول المسجد؟',
+                hint: 'دعاء يطلب فتح أبواب الرحمة.',
+                options: [
+                    { text: '«اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ»', correct: true, feedback: 'صحيح! نسأل الله دائماً أن يفتح لنا أبواب رحمته عند دخول بيته.' },
+                    { text: '«اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ»', correct: false, feedback: 'هذا الدعاء يُقال عند الخروج من المسجد وليس الدخول.' },
+                    { text: '«بسم الله وولجنا وبسم الله خرجنا»', correct: false, feedback: 'هذا دعاء دخول المنزل.' }
+                ]
+            }
+        ];
+
+        // --- STAGE 4: ENTRY STEPS ORDERING ---
+        const STAGE4_STEPS = [
+            { id: 1, text: 'التأكد من نظافة الجوارب والمظهر' },
+            { id: 2, text: 'نزع الحذاء بانتظام ووضعه في الرف المخصص' },
+            { id: 3, text: 'تقديم القدم اليمنى عند باب المسجد' },
+            { id: 4, text: 'قول دعاء الدخول: «اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ»' },
+            { id: 5, text: 'المشي بهدوء وسكينة باتجاه مكان الصلاة' }
+        ];
+
+        // --- STAGE 5: MOSQUE HOTSPOTS & CHALLENGES ---
+        const STAGE5_HOTSPOTS = [
+            { id: 'carpet', icon: '🕌', name: 'سجاد المسجد', info: 'سجاد المسجد مُعد للصلاة والعبادة؛ نحافظ على نظافته ولا نطأ عليه بالأحذية ولا نترك أثراً للأوساخ عليه.' },
+            { id: 'quran', icon: '📖', name: 'رف المصاحف', info: 'المصحف الشريف كلام الله؛ نأخذه بأدب ونقرأ فيه بهدوء، ثم نرجعه إلى مكانه المخصص بكل احترام دون تركه على الأرض.' },
+            { id: 'shoes', icon: '👟', name: 'رف الأحذية', info: 'وضع الأحذية منظمات في الرف يمنع الازدحام ويحافظ على نظافة مداخل بيوت الله.' },
+            { id: 'wudu', icon: '🚿', name: 'مكان الوضوء', info: 'الوضوء شطر الإيمان؛ نقتصد في استخدام الماء ولا نلعب بالمياه، ونترك المكان نظيفاً لمن بعدنا.' },
+            { id: 'trash', icon: '🗑️', name: 'سلة المهملات', info: 'إذا وجدت المنديل أو الورق على السجاد، فضعه في سلة المهملات، فالنظافة من الإيمان.' },
+            { id: 'quiet', icon: '🤫', name: 'سكينة المصلين', info: 'احترام المصلين والقائمين بالذكر بمنع الأصوات المرتفعة ورنات الهواتف المحمولة.' }
+        ];
+
+        const STAGE5_CHALLENGE = {
+            question: 'أثناء جلوسك تنتظر الصلاة، بدأ أحد أصدقائك بالتحدث معك بصوت مرتفع والضحك. ماذا تفعل؟',
+            hint: 'النصيحة بالحكمة والمحافظة على سكينة المكان.',
+            options: [
+                { text: 'أنصحه بهدوء وأذكره بلطف بحرمة المسجد وضرورة الهدوء', correct: true, feedback: 'رائع جداً! النصيحة بالتي هي أحسن هي السلوك الراقي والواجب.' },
+                { text: 'أصرخ عليه بصوت أعلى لكي يسكت', correct: false, feedback: 'الصراخ يزيد الإزعاج داخل المسجد. التناصح يكون بهدوء وسر.' },
+                { text: 'أبدأ باللعب والضحك معه', correct: false, feedback: 'اللعب والضحك يخالفان الغرض الأساسي من زيارة المسجد.' },
+                { text: 'أتجاهله وأرفع صوتي بالحديث مع شخص آخر', correct: false, feedback: 'هذا يزيد الضوضاء ويؤذي المصلين.' }
+            ]
+        };
+
+        // --- STAGE 6: TRUE / FALSE QUICK FIRE ---
+        const STAGE6_QUESTIONS = [
+            { q: 'المحافظة على نظافة المسجد وترتيب مصاحفه سلوك يحبه الله.', a: true, exp: 'بالتأكيد، عمارة المساجد وتطهيرها من أسباب تحصيل الأجر العظيم.' },
+            { q: 'رفع الصوت بالحديث أو المزاح داخل المسجد سلوك مقبول.', a: false, exp: 'خطأ، المسجد مكان للعبادة والهدوء والسكينة.' },
+            { q: 'إغلاق الهاتف المحمول أو جعله على الصامت أثناء الصلاة من الآداب المهمة.', a: true, exp: 'صحيح، لعدم إشغال المصلين وتشتيت خشوعهم.' },
+            { q: 'العبث بمحتويات المسجد وأزرار التكييف ومكبرات الصوت أمر عادي.', a: false, exp: 'خطأ، مرافق المسجد أمانة عامة يجب احترامها وعدم العبث بها.' },
+            { q: 'صلاة تحية المسجد (ركعتين) عند الدخول تعتبر من السنن المستحبة.', a: true, exp: 'صحيح، قال ﷺ: «إذا دخل أحدكم المسجد فلا يجلس حتى يصلي ركعتين».' }
+        ];
+
+        // --- STAGE 7: EVENT SEQUENCING ---
+        const STAGE7_EVENTS = [
+            { id: 1, text: 'الاستعداد والطهارة وارتداء الملابس النظيفة في المنزل' },
+            { id: 2, text: 'الخروج من المنزل وقراءة دعاء الخروج' },
+            { id: 3, text: 'المشي بسكينة ووقار اتجاه المسجد' },
+            { id: 4, text: 'خلع الحذاء ووضعه في رف الأحذية' },
+            { id: 5, text: 'الدخول بالقدم اليمنى ودعاء الدخول' },
+            { id: 6, text: 'صلاة تحية المسجد والمحافظة على الهدوء' },
+            { id: 7, text: 'الخروج بالقدم اليسرى ودعاء الخروج' },
+            { id: 8, text: 'العودة إلى المنزل بسلام وأجر مضاعف' }
+        ];
+
+        // --- STAGE 8: REALISTIC SCENARIOS (10 SITUATIONS) ---
+        const STAGE8_SCENARIOS = [
+            {
+                title: 'موقف 1: الهاتف المحمول',
+                desc: 'دخلت المسجد وهاتفك الذكي يرن بنغمة عالية أثناء قراءة القرآن.',
+                options: [
+                    { text: 'أبادر فوراً بقطع النغمة وجعل الهاتف على الوضع الصامت', correct: true, feedback: 'ممتاز! المبادرة بإيقاف الصوت تمنع تشتيت المصلين.' },
+                    { text: 'أترك الهاتف يرن حتى ينتهي المتصل بنفسه', correct: false, feedback: 'استمرار الرنين يزعج جميع الحاضرين.' },
+                    { text: 'أرد على المكالمة بصوت منخفض داخل المسجد', correct: false, feedback: 'التحدث في الهاتف داخل المسجد ينافي السكينة.' }
+                ]
+            },
+            {
+                title: 'موقف 2: الزحام عند الأبواب',
+                desc: 'عند انتهاء الصلاة، تدافع بعض الأطفال للخروج بسرعة من الباب.',
+                options: [
+                    { text: 'أنتظر بقليل من الصبر حتى يخف الزحام وأخرج بتؤدة', correct: true, feedback: 'أحسنت! الصبر والهدوء يمنعان الأذى والإصابات.' },
+                    { text: 'أدفع من أمامي لأخرج أولاً', correct: false, feedback: 'التدافع سلوك غير لائق قد يؤذي الآخرين وخاصة كبار السن.' }
+                ]
+            },
+            {
+                title: 'موقف 3: سلة المهملات',
+                desc: 'وجدت منديلاً ورقياً مستعملاً ملقى على carpet المسجد.',
+                options: [
+                    { text: 'ألتقطه بأدب وأضعه في سلة المهملات', correct: true, feedback: 'تبارك الله! تنظيف المسجد عمل صالح تحبه الملائكة.' },
+                    { text: 'أتركه مكان لأنني لست من ألقاه', correct: false, feedback: 'إيجابية المسلم تجعله يبادر بالإصلاح والتنظيف دائماً.' }
+                ]
+            },
+            {
+                title: 'موقف 4: التخطي بين الصفوف',
+                desc: 'جئت متأخراً ووجدت الصفوف الأولى مكتملة والمصلون يتلون القرآن.',
+                options: [
+                    { text: 'أجلس حيث انتهى بي المجلس دون يتخطي رقاب الناس', correct: true, feedback: 'نهى النبي ﷺ عن تخطي رقاب المصلين لما فيه من إزعاج لهم.' },
+                    { text: 'أمرّ بين المصلين وأزاحمهم لأصل للصف الأول بالقوة', correct: false, feedback: 'المزاحمة والتخطي يقطعان خشوع المصلين.' }
+                ]
+            },
+            {
+                title: 'موقف 5: صلاة تحية المسجد',
+                desc: 'دخلت المسجد قبل الأذان ووجدت مكاناً خالياً.',
+                options: [
+                    { text: 'أصلي ركعتين تحية المسجد قبل أن أجلس', correct: true, feedback: 'هذه سنة مؤكدة تعظيماً لبيت الله.' },
+                    { text: 'أجلس فوراً دون صلاة', correct: false, feedback: 'الأفضل صلاة ركعتين أولاً قبل الجلوس.' }
+                ]
+            },
+            {
+                title: 'موقف 6: طفل يصرخ',
+                desc: 'طفل صغير يبكي في المسجد وأمه تحاول تهديته.',
+                options: [
+                    { text: 'أدعو له بالهداية وأصبر دون إظهار التذمر أو النهر', correct: true, feedback: 'الرفق والأخلاق الحسنة تعكس سماحة الإسلام.' },
+                    { text: 'أصرخ في وجه الطفل لكي يسكت', correct: false, feedback: 'النهر والصراخ يخيف الطفل ويؤذي أهله.' }
+                ]
+            },
+            {
+                title: 'موقف 7: إرجاع المصحف',
+                desc: 'انتهيت من قراءة السورة المقررة قبل الصلاة.',
+                options: [
+                    { text: 'أعيد المصحف إلى مكانه المخصص في الرف بعناية', correct: true, feedback: 'إرجاع المصاحف لأماكنها يحافظ على نظام المسجد.' },
+                    { text: 'أتركه على السجاد أو الفرش وأقوم للصلاة', correct: false, feedback: 'المصحف يجب أن يُرفع ويُكرم ولا يُترك على الأرض.' }
+                ]
+            },
+            {
+                title: 'موقف 8: الخروج من المسجد',
+                desc: 'وصلت إلى باب الخروج بعد الصلاة والذكر.',
+                options: [
+                    { text: 'أقدم رجلي اليسرى وأقول: «اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ»', correct: true, feedback: 'هذه هي السنة النبوية الشريفة عند الخروج.' },
+                    { text: 'أخرج بقدمي اليمنى مسرعاً', correct: false, feedback: 'السنة في الخروج تقديم الرجل اليسرى.' }
+                ]
+            },
+            {
+                title: 'موقف 9: رائحة كريهة',
+                desc: 'أكلت وجبة تحتوي على ثوم طازج قبل وقت الصلاة بفترة قصيرة.',
+                options: [
+                    { text: 'أنظف فمي بالسواك والمعجون جيداً، وإذا بقيت الرائحة أصلي في بيتي', correct: true, feedback: 'نهى النبي ﷺ عن إيذاء المصلين بالروائح الكريهة.' },
+                    { text: 'أذهب للمسجد مباشرة دون تنظيف الفم', correct: false, feedback: 'الروائح الكريهة تؤذي الملائكة والمصلين.' }
+                ]
+            },
+            {
+                title: 'موقف 10: المساعدة في تنظيم المصاحف',
+                desc: 'لاحظت أن بعض المصاحف متناثرة بشكل غير مرتب على الرفوف.',
+                options: [
+                    { text: 'أبادر برغبة وطوع لترتيبها وتنظيمها بنفس طيبة', correct: true, feedback: 'عمل رائع يكتب لك به أجر المصلين والعابدين.' },
+                    { text: 'أتركها كما هي فليس هذا عملي', correct: false, feedback: 'المسلم يحرص دائماً على عمارة المسجد وخدمته.' }
+                ]
+            }
+        ];
+
+        // --- STAGE 9: FINAL EXAM (10 QUESTIONS MIXED) ---
+        const STAGE9_EXAM = [
+            { q: 'ما هي القدم التي يُسن تقديمها عند دخول المسجد؟', opts: ['القدم اليمنى', 'القدم اليسرى', 'لا يهم أي قدم'], a: 0, exp: 'يُسن تقديم القدم اليمنى عند الدخول واليسرى عند الخروج.' },
+            { q: 'ما هو الدعاء الذي نقوله عند خروجنا من المسجد؟', opts: ['اللهم افتح لي أبواب رحمتك', 'اللهم إني أسألك من فضلك', 'الحمد لله الذي أحيانا'], a: 1, exp: 'عند الخروج نسأل الله من فضله ورزقه البركة.' },
+            { q: 'هل يجوز الجري والركض داخل المسجد للحاق بالركعة؟', opts: ['نعم يجوز بسرعة', 'لا، بل نمشي بسكينة ووقار', 'يجوز للأطفال فقط'], a: 1, exp: 'أوصى النبي ﷺ بالسكينة والوقار وعدم الإسراع.' },
+            { q: 'أين يجب وضع الأحذية عند الوصول للمسجد؟', opts: ['أمام الباب المباشر', 'في الرفوف المخصصة للأحذية', 'بجانب المصلين على السجاد'], a: 1, exp: 'وضعها في الرفوف يمنع العرقلة ويحافظ على نظافة السجاد.' },
+            { q: 'السلوك الصحيح عند سماع رنين هاتف في المسجد هو:', opts: ['التجاهل', 'قطع الرنين فوراً وجعله صامتاً', 'الغضب والصراخ'], a: 1, exp: 'المبادرة بإسكات الصوت تحمي خشوع المصلين.' },
+            { q: 'التعطر والتطيب واستعمال السواك قبل الذهاب للمسجد يعتبر:', opts: ['من سنن النظافة وآداب المسجد', 'سلوكاً غير مرغوب', 'أمراً غير مهم'], a: 0, exp: 'التطيب والسواك من الآداب المندوبة المؤكدة.' },
+            { q: 'ما معنى صلاة تحية المسجد؟', opts: ['صلاة ركعتين عند دخول المسجد قبل الجلوس', 'صلاة الجمعة فقط', 'دعاء الخروج'], a: 0, exp: 'هي ركعتان نصليها تعظيماً لبيت الله قبل الجلوس.' },
+            { q: 'إذا رأيت نفايات على سجاد المسجد فإنك:', opts: ['تتركها', 'تلقيها على غيرك', 'تجمعها وتضعها في سلة المهملات'], a: 2, exp: 'تطهير المسجد ونظافته عمل الجليل الأجر.' },
+            { q: 'تخطي رقاب المصلين للوصول للصف الأول سلوك:', opts: ['مستحب ومحمود', 'مكروه ومنهي عنه لما فيه من إيذاء', 'واجب'], a: 1, exp: 'ينبغي ألا نؤذي المصلين بالتخطي والمزاحمة.' },
+            { q: 'الحديث بصوت مرتفع والضحك داخل المسجد ينافي:', opts: ['السكينة والوقار واحتكار حرمة المسجد', 'الصحة البدنية', 'سرعة المشي'], a: 0, exp: 'المسجد بيت ذكر وعبادة وخشوع.' }
+        ];
+
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+            }
+
+            playCorrect() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15); // E5
+                
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playWrong() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playPoint() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playBadge() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+                    
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.08 + 0.2);
+
+                    osc.start(this.ctx.currentTime + idx * 0.08);
+                    osc.stop(this.ctx.currentTime + idx * 0.08 + 0.2);
+                });
+            }
+        }
+
+        const sounds = new SoundEngine();
+
+        class MosqueGame {
+            constructor() {
+                this.state = {
+                    name: 'زائر المسجد',
+                    avatar: '👦',
+                    difficulty: 'easy',
+                    score: 0,
+                    currentStage: 1,
+                    totalStages: 9,
+                    badges: [],
+                    correctAnswersCount: 0,
+                    totalQuestionsAnswered: 0,
+                    stageProgress: {}
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.loadProgress();
+                this.bindEvents();
+                this.updateUIHeader();
+            }
+
+            saveProgress() {
+                try {
+                    localStorage.setItem('mosque_game_data', JSON.stringify(this.state));
+                } catch (e) {
+                    console.warn('LocalStorage unavailable');
+                }
+            }
+
+            loadProgress() {
+                try {
+                    const saved = localStorage.getItem('mosque_game_data');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        this.state = { ...this.state, ...parsed };
+                    }
+                } catch (e) {
+                    console.warn('Error loading progress');
+                }
+            }
+
+            resetProgress() {
+                localStorage.removeItem('mosque_game_data');
+                this.state = {
+                    name: 'زائر المسجد',
+                    avatar: '👦',
+                    difficulty: 'easy',
+                    score: 0,
+                    currentStage: 1,
+                    totalStages: 9,
+                    badges: [],
+                    correctAnswersCount: 0,
+                    totalQuestionsAnswered: 0,
+                    stageProgress: {}
+                };
+                this.updateUIHeader();
+                this.showScreen('screen-welcome');
+            }
+
+            addScore(pts) {
+                this.state.score += pts;
+                sounds.playPoint();
+                this.updateUIHeader();
+                this.saveProgress();
+            }
+
+            unlockBadge(badgeId) {
+                if (!this.state.badges.includes(badgeId)) {
+                    this.state.badges.push(badgeId);
+                    sounds.playBadge();
+                    const bObj = BADGES_DEFINITIONS.find(b => b.id === badgeId);
+                    if (bObj) {
+                        this.showFeedback('🏅 شارة جديدة!', `مبروك! لقد حصلت على: ${bObj.icon} ${bObj.title}`, true);
+                    }
+                    this.updateUIHeader();
+                    this.saveProgress();
+                }
+            }
+
+            getLevelInfo() {
+                const s = this.state.score;
+                if (s < 50) return { title: 'زائر المسجد', icon: '🌱', levelNum: 1 };
+                if (s < 120) return { title: 'محب المسجد', icon: '⭐', levelNum: 2 };
+                if (s < 220) return { title: 'آداب المسجد', icon: '🏅', levelNum: 3 };
+                return { title: 'سفير الآداب', icon: '🕌', levelNum: 4 };
+            }
+
+            updateUIHeader() {
+                document.getElementById('header-name').textContent = this.state.name;
+                document.getElementById('header-avatar').textContent = this.state.avatar;
+                document.getElementById('header-score').textContent = this.state.score;
+                
+                const lvl = this.getLevelInfo();
+                document.getElementById('header-level').textContent = `${lvl.icon} المستوى ${lvl.levelNum}: ${lvl.title}`;
+                document.getElementById('header-badges-count').textContent = `${this.state.badges.length} / ${BADGES_DEFINITIONS.length}`;
+
+                // Progress Bar
+                const progPct = ((this.state.currentStage - 1) / this.state.totalStages) * 100;
+                document.getElementById('progress-bar').style.width = `${progPct}%`;
+            }
+
+            showScreen(screenId) {
+                const screens = ['screen-welcome', 'screen-setup', 'screen-game', 'screen-results'];
+                screens.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add('hidden');
+                });
+
+                const active = document.getElementById(screenId);
+                if (active) active.classList.remove('hidden');
+
+                const progContainer = document.getElementById('progress-container');
+                if (screenId === 'screen-game') {
+                    progContainer.classList.remove('hidden');
+                } else {
+                    progContainer.classList.add('hidden');
+                }
+            }
+
+            showFeedback(title, msg, isSuccess, callback = null) {
+                const modal = document.getElementById('modal-feedback');
+                const box = document.getElementById('feedback-box');
+                const icon = document.getElementById('feedback-icon');
+                const tEl = document.getElementById('feedback-title');
+                const mEl = document.getElementById('feedback-msg');
+                const btn = document.getElementById('btn-feedback-continue');
+
+                icon.textContent = isSuccess ? '✅' : '💡';
+                tEl.textContent = title;
+                tEl.className = `text-2xl font-extrabold mb-2 ${isSuccess ? 'text-emerald-400' : 'text-amber-300'}`;
+                mEl.textContent = msg;
+
+                if (isSuccess) {
+                    sounds.playCorrect();
+                } else {
+                    sounds.playWrong();
+                }
+
+                modal.classList.remove('hidden');
+
+                const handler = () => {
+                    modal.classList.add('hidden');
+                    btn.removeEventListener('click', handler);
+                    if (callback) callback();
+                };
+
+                btn.addEventListener('click', handler);
+            }
+
+            bindEvents() {
+                // Sound toggle
+                document.getElementById('btn-sound').addEventListener('click', () => {
+                    sounds.muted = !sounds.muted;
+                    document.getElementById('btn-sound').textContent = sounds.muted ? '🔇' : '🔊';
+                });
+
+                // Start button
+                document.getElementById('btn-start-game').addEventListener('click', () => {
+                    this.showScreen('screen-setup');
+                });
+
+                // How to play
+                document.getElementById('btn-how-to-play').addEventListener('click', () => {
+                    document.getElementById('modal-how').classList.remove('hidden');
+                });
+                document.getElementById('close-modal-how').addEventListener('click', () => {
+                    document.getElementById('modal-how').classList.add('hidden');
+                });
+
+                // Achievements
+                document.getElementById('btn-achievements').addEventListener('click', () => {
+                    this.renderAchievementsModal();
+                    document.getElementById('modal-achievements').classList.remove('hidden');
+                });
+                document.getElementById('close-modal-achievements').addEventListener('click', () => {
+                    document.getElementById('modal-achievements').classList.add('hidden');
+                });
+
+                // Reset modal
+                document.getElementById('btn-reset-confirm').addEventListener('click', () => {
+                    document.getElementById('modal-confirm-reset').classList.remove('hidden');
+                });
+                document.getElementById('btn-cancel-reset').addEventListener('click', () => {
+                    document.getElementById('modal-confirm-reset').classList.add('hidden');
+                });
+                document.getElementById('btn-do-reset').addEventListener('click', () => {
+                    document.getElementById('modal-confirm-reset').classList.add('hidden');
+                    this.resetProgress();
+                });
+
+                // Setup screen options
+                document.querySelectorAll('.avatar-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.avatar-option').forEach(b => {
+                            b.classList.remove('border-emerald-600');
+                            b.classList.add('border-slate-700');
+                        });
+                        const target = e.currentTarget;
+                        target.classList.remove('border-slate-700');
+                        target.classList.add('border-emerald-600');
+                        this.state.avatar = target.getAttribute('data-avatar');
+                    });
+                });
+
+                document.querySelectorAll('.diff-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.diff-option').forEach(b => {
+                            b.classList.remove('border-emerald-500');
+                            b.classList.add('border-slate-700');
+                        });
+                        const target = e.currentTarget;
+                        target.classList.remove('border-slate-700');
+                        target.classList.add('border-emerald-500');
+                        this.state.difficulty = target.getAttribute('data-diff');
+                    });
+                });
+
+                document.getElementById('btn-back-to-welcome').addEventListener('click', () => {
+                    this.showScreen('screen-welcome');
+                });
+
+                document.getElementById('btn-confirm-setup').addEventListener('click', () => {
+                    const nameInput = document.getElementById('input-player-name').value.trim();
+                    if (nameInput) this.state.name = nameInput;
+                    this.updateUIHeader();
+                    this.loadStage(1);
+                    this.showScreen('screen-game');
+                });
+
+                // Hint Button
+                document.getElementById('btn-hint').addEventListener('click', () => {
+                    if (this.state.score >= 5) {
+                        this.addScore(-5);
+                        const hintText = this.currentStageHint || 'فكر في السلوك الذي يحافظ على هدوء المسجد ونظافته ويحترم المصلين.';
+                        this.showFeedback('💡 تلميح هاديء', hintText, false);
+                    } else {
+                        this.showFeedback('تنبيه', 'نقاطك غير كافية للحصول على تلميح (-5 نقاط المطلوبة).', false);
+                    }
+                });
+
+                // Results Screen buttons
+                document.getElementById('btn-restart-game').addEventListener('click', () => {
+                    this.state.currentStage = 1;
+                    this.loadStage(1);
+                    this.showScreen('screen-game');
+                });
+                document.getElementById('btn-results-main').addEventListener('click', () => {
+                    this.showScreen('screen-welcome');
+                });
+            }
+
+            renderAchievementsModal() {
+                const grid = document.getElementById('badges-grid');
+                grid.innerHTML = '';
+
+                BADGES_DEFINITIONS.forEach(b => {
+                    const unlocked = this.state.badges.includes(b.id);
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-2xl border flex items-center space-x-3 space-x-reverse ${
+                        unlocked ? 'bg-emerald-950/80 border-amber-400' : 'bg-slate-900/50 border-slate-800 opacity-60'
+                    }`;
+                    card.innerHTML = `
+                        <div class="text-4xl p-2 rounded-xl ${unlocked ? 'bg-amber-500/20' : 'bg-slate-800'}">${b.icon}</div>
+                        <div>
+                            <h4 class="font-bold text-amber-300 text-base">${b.title} ${unlocked ? '✅' : '🔒'}</h4>
+                            <p class="text-xs text-slate-300 mt-1">${b.desc}</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            loadStage(stageNum) {
+                this.state.currentStage = stageNum;
+                this.updateUIHeader();
+
+                const viewport = document.getElementById('stage-viewport');
+                viewport.innerHTML = '';
+
+                const iconEl = document.getElementById('stage-icon');
+                const titleEl = document.getElementById('stage-title');
+
+                switch (stageNum) {
+                    case 1:
+                        iconEl.textContent = '🏠';
+                        titleEl.textContent = 'المرحلة 1: الاستعداد والملابس';
+                        this.renderStage1(viewport);
+                        break;
+                    case 2:
+                        iconEl.textContent = '🚶';
+                        titleEl.textContent = 'المرحلة 2: الطريق إلى المسجد';
+                        this.renderStage2(viewport);
+                        break;
+                    case 3:
+                        iconEl.textContent = '🕌';
+                        titleEl.textContent = 'المرحلة 3: أمام أبواب المسجد';
+                        this.renderStage3(viewport);
+                        break;
+                    case 4:
+                        iconEl.textContent = '🚪';
+                        titleEl.textContent = 'المرحلة 4: ترتيب خطوات دخول المسجد';
+                        this.renderStage4(viewport);
+                        break;
+                    case 5:
+                        iconEl.textContent = '🕌';
+                        titleEl.textContent = 'المرحلة 5: داخل المسجد ومرافقه';
+                        this.renderStage5(viewport);
+                        break;
+                    case 6:
+                        iconEl.textContent = '✅';
+                        titleEl.textContent = 'المرحلة 6: تحدي "صح أم خطأ" السريع';
+                        this.renderStage6(viewport);
+                        break;
+                    case 7:
+                        iconEl.textContent = '🔢';
+                        titleEl.textContent = 'المرحلة 7: ترتيب الأحداث التفاعلي';
+                        this.renderStage7(viewport);
+                        break;
+                    case 8:
+                        iconEl.textContent = '🎯';
+                        titleEl.textContent = 'المرحلة 8: تحدي المواقف الواقعية';
+                        this.renderStage8(viewport);
+                        break;
+                    case 9:
+                        iconEl.textContent = '🏆';
+                        titleEl.textContent = 'المرحلة 9: المهمة النهائية والتحديد الشامل';
+                        this.renderStage9(viewport);
+                        break;
+                }
+            }
+
+            renderStage1(container) {
+                this.currentStageHint = 'اختر الثياب النظيفة والسواك والحذاء والتجهيزات المناسبة للعبادة فقط.';
+                
+                let selectedCorrect = [];
+                const totalRequired = STAGE1_ITEMS.filter(i => i.correct).length;
+
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-2xl">
+                        <p class="text-emerald-200 text-sm md:text-base mb-4 font-medium">
+                            أنت الآن تستعد للذهاب للمسجد! اضغط على الأشياء المناسبة لتجهزها معك:
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" id="s1-grid"></div>
+                        <div class="text-center text-xs text-amber-300 font-bold" id="s1-status">
+                            اختر العناصر المناسبة (0 / ${totalRequired})
+                        </div>
+                    </div>
+                `;
+
+                const grid = container.querySelector('#s1-grid');
+                STAGE1_ITEMS.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'bg-slate-900/80 hover:bg-slate-800 border-2 border-slate-700 rounded-2xl p-4 flex flex-col items-center justify-center transition shadow-md';
+                    btn.innerHTML = `
+                        <span class="text-4xl mb-2">${item.icon}</span>
+                        <span class="text-xs font-bold text-slate-200">${item.name}</span>
+                    `;
+
+                    btn.addEventListener('click', () => {
+                        this.state.totalQuestionsAnswered++;
+                        if (item.correct) {
+                            if (!selectedCorrect.includes(item.id)) {
+                                selectedCorrect.push(item.id);
+                                btn.classList.remove('border-slate-700');
+                                btn.classList.add('border-emerald-400', 'bg-emerald-950/80');
+                                this.addScore(10);
+                                this.state.correctAnswersCount++;
+                                this.showFeedback('اختيار موفق! ✅', item.reason, true);
+                            }
+                        } else {
+                            btn.classList.add('border-red-500', 'bg-red-950/40');
+                            this.showFeedback('غير مناسب ❌', item.reason, false);
+                        }
+
+                        document.getElementById('s1-status').textContent = `اختر العناصر المناسبة (${selectedCorrect.length} / ${totalRequired})`;
+
+                        if (selectedCorrect.length === totalRequired) {
+                            this.unlockBadge('badgeCleanliness');
+                            this.addScore(20);
+                            setTimeout(() => {
+                                this.showFeedback('ممتاز! 🎉', 'لقد جهزت جميع مستلزماتك بنجاح ونظافة. حان وقت الذهاب للمسجد!', true, () => {
+                                    this.loadStage(2);
+                                });
+                            }, 500);
+                        }
+                    });
+
+                    grid.appendChild(btn);
+                });
+            }
+
+            renderStage2(container) {
+                let currentIdx = 0;
+                
+                const renderEncounter = () => {
+                    const enc = STAGE2_ENCOUNTERS[currentIdx];
+                    this.currentStageHint = enc.hint;
+
+                    container.innerHTML = `
+                        <div class="w-full max-w-2xl bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 text-right">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs text-amber-300 font-bold bg-amber-950 px-3 py-1 rounded-full border border-amber-500/30">
+                                    الموقف ${currentIdx + 1} من ${STAGE2_ENCOUNTERS.length}
+                                </span>
+                                <span class="text-3xl">🚶‍♂️</span>
+                            </div>
+
+                            <p class="text-base md:text-lg text-slate-100 font-bold mb-6 leading-relaxed">
+                                ${enc.situation}
+                            </p>
+
+                            <div class="space-y-3" id="s2-options"></div>
+                        </div>
+                    `;
+
+                    const optContainer = container.querySelector('#s2-options');
+                    enc.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-right bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-sm font-bold text-slate-200 transition flex items-center space-x-3 space-x-reverse';
+                        btn.innerHTML = `<span class="text-amber-400">🔸</span><span>${opt.text}</span>`;
+
+                        btn.addEventListener('click', () => {
+                            this.state.totalQuestionsAnswered++;
+                            if (opt.correct) {
+                                this.addScore(10);
+                                this.state.correctAnswersCount++;
+                                this.showFeedback('أحسنت! ✅', opt.feedback, true, () => {
+                                    currentIdx++;
+                                    if (currentIdx < STAGE2_ENCOUNTERS.length) {
+                                        renderEncounter();
+                                    } else {
+                                        this.unlockBadge('badgeQuiet');
+                                        this.addScore(20);
+                                        this.showFeedback('مرحلة رائعة! 🌟', 'وصلت إلى ساحة المسجد بأمان ووقار.', true, () => {
+                                            this.loadStage(3);
+                                        });
+                                    }
+                                });
+                            } else {
+                                this.showFeedback('حاول مجدداً 💡', opt.feedback, false);
+                            }
+                        });
+
+                        optContainer.appendChild(btn);
+                    });
+                };
+
+                renderEncounter();
+            }
+
+            renderStage3(container) {
+                let qIdx = 0;
+
+                const renderQ = () => {
+                    const qData = STAGE3_QUESTIONS[qIdx];
+                    this.currentStageHint = qData.hint;
+
+                    container.innerHTML = `
+                        <div class="w-full max-w-2xl bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 text-right">
+                            <div class="text-center mb-4">
+                                <span class="text-5xl">🕌</span>
+                                <h3 class="text-lg font-extrabold text-amber-300 mt-2">أمام باب المسجد</h3>
+                            </div>
+
+                            <p class="text-base text-slate-100 font-bold mb-6 text-center">
+                                ${qData.question}
+                            </p>
+
+                            <div class="space-y-3" id="s3-options"></div>
+                        </div>
+                    `;
+
+                    const optContainer = container.querySelector('#s3-options');
+                    qData.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-right bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-sm font-bold text-slate-200 transition';
+                        btn.textContent = opt.text;
+
+                        btn.addEventListener('click', () => {
+                            this.state.totalQuestionsAnswered++;
+                            if (opt.correct) {
+                                this.addScore(10);
+                                this.state.correctAnswersCount++;
+                                this.showFeedback('إجابة مباركة! ✅', opt.feedback, true, () => {
+                                    qIdx++;
+                                    if (qIdx < STAGE3_QUESTIONS.length) {
+                                        renderQ();
+                                    } else {
+                                        this.addScore(20);
+                                        this.loadStage(4);
+                                    }
+                                });
+                            } else {
+                                this.showFeedback('سلوك غير دقيق ❌', opt.feedback, false);
+                            }
+                        });
+
+                        optContainer.appendChild(btn);
+                    });
+                };
+
+                renderQ();
+            }
+
+            renderStage4(container) {
+                this.currentStageHint = 'اضغط على الخطوات بالترتيب الصحيح بدءاً من التفقد والنظافة حتى الدخول بهدوء.';
+                
+                let shuffled = [...STAGE4_STEPS].sort(() => Math.random() - 0.5);
+                let selectedOrder = [];
+
+                container.innerHTML = `
+                    <div class="w-full max-w-2xl text-center">
+                        <p class="text-emerald-200 text-sm font-medium mb-4">
+                            اضغط على خطوات الدخول بالترتيب الشرعي والتربوي الصحيح:
+                        </p>
+                        <div class="space-y-2 mb-6" id="s4-list"></div>
+                        <button id="btn-reset-s4" class="text-xs text-amber-400 underline font-bold">إعادة الترتيب</button>
+                    </div>
+                `;
+
+                const list = container.querySelector('#s4-list');
+
+                const renderButtons = () => {
+                    list.innerHTML = '';
+                    shuffled.forEach(step => {
+                        const idxInSelected = selectedOrder.indexOf(step.id);
+                        const isSelected = idxInSelected !== -1;
+
+                        const btn = document.createElement('button');
+                        btn.className = `w-full text-right p-3.5 rounded-xl text-sm font-bold flex items-center justify-between transition ${
+                            isSelected ? 'bg-amber-950 border-2 border-amber-400 text-amber-200' : 'bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800'
+                        }`;
+                        btn.innerHTML = `
+                            <span>${step.text}</span>
+                            <span class="w-7 h-7 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-xs text-amber-300">
+                                ${isSelected ? idxInSelected + 1 : '•'}
+                            </span>
+                        `;
+
+                        btn.addEventListener('click', () => {
+                            if (!isSelected) {
+                                selectedOrder.push(step.id);
+                                renderButtons();
+
+                                if (selectedOrder.length === STAGE4_STEPS.length) {
+                                    // Verify order
+                                    let isCorrectOrder = selectedOrder.every((val, index) => val === index + 1);
+                                    this.state.totalQuestionsAnswered++;
+
+                                    if (isCorrectOrder) {
+                                        this.addScore(10);
+                                        this.state.correctAnswersCount++;
+                                        this.addScore(20);
+                                        this.showFeedback('ترتيب صحيح 100%! 🎉', 'دخلت المسجد بالقدم اليمنى وبذكر الله بكل وقار وسكينة.', true, () => {
+                                            this.loadStage(5);
+                                        });
+                                    } else {
+                                        this.showFeedback('الترتيب غير دقيق ❌', 'تذكر: النظافة والخلع في الرف أولاً، ثم القدم اليمنى والدعاء.', false, () => {
+                                            selectedOrder = [];
+                                            renderButtons();
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
+                        list.appendChild(btn);
+                    });
+                };
+
+                container.querySelector('#btn-reset-s4').addEventListener('click', () => {
+                    selectedOrder = [];
+                    renderButtons();
+                });
+
+                renderButtons();
+            }
+
+            renderStage5(container) {
+                this.currentStageHint = 'اضغط على كافة الأيقونات للتعرف على مرافق المسجد وأحكامها قبل التحدي.';
+                
+                let visitedHotspots = new Set();
+
+                container.innerHTML = `
+                    <div class="w-full max-w-3xl text-center">
+                        <p class="text-emerald-200 text-sm mb-4">
+                            اضغط على العناصر التفاعلية لمسجدنا لاستكشاف الآداب الخاصة بكل مرفق:
+                        </p>
+
+                        <!-- Interactive Mosque Room Layout -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                            ${STAGE5_HOTSPOTS.map(h => `
+                                <button data-hid="${h.id}" class="hotspot-btn bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 p-4 rounded-2xl flex flex-col items-center justify-center transition">
+                                    <span class="text-4xl mb-2">${h.icon}</span>
+                                    <span class="text-xs font-bold text-amber-300">${h.name}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <div id="hotspot-info-box" class="bg-emerald-950/80 border border-emerald-500/40 p-4 rounded-2xl text-right mb-6 hidden">
+                            <h4 id="hs-title" class="font-bold text-amber-300 text-base mb-1"></h4>
+                            <p id="hs-desc" class="text-xs text-emerald-100 leading-relaxed"></p>
+                        </div>
+
+                        <div id="s5-challenge-box" class="hidden text-right bg-slate-900/90 border border-amber-500/50 p-5 rounded-2xl">
+                            <h4 class="font-extrabold text-amber-300 text-sm mb-3">🎯 تحدي داخل المسجد:</h4>
+                            <p class="text-sm font-bold text-slate-100 mb-4">${STAGE5_CHALLENGE.question}</p>
+                            <div class="space-y-2" id="s5-options"></div>
+                        </div>
+                    </div>
+                `;
+
+                const btns = container.querySelectorAll('.hotspot-btn');
+                const infoBox = container.querySelector('#hotspot-info-box');
+                const hsTitle = container.querySelector('#hs-title');
+                const hsDesc = container.querySelector('#hs-desc');
+                const challengeBox = container.querySelector('#s5-challenge-box');
+
+                btns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const hid = btn.getAttribute('data-hid');
+                        const hObj = STAGE5_HOTSPOTS.find(h => h.id === hid);
+                        if (hObj) {
+                            visitedHotspots.add(hid);
+                            btn.classList.remove('border-slate-700');
+                            btn.classList.add('border-emerald-400', 'bg-emerald-950/60');
+
+                            hsTitle.textContent = `${hObj.icon} ${hObj.name}`;
+                            hsDesc.textContent = hObj.info;
+                            infoBox.classList.remove('hidden');
+
+                            sounds.playPoint();
+
+                            if (visitedHotspots.size === STAGE5_HOTSPOTS.length) {
+                                this.unlockBadge('badgePreservation');
+                                challengeBox.classList.remove('hidden');
+                            }
+                        }
+                    });
+                });
+
+                // Challenge Options
+                const optContainer = container.querySelector('#s5-options');
+                STAGE5_CHALLENGE.options.forEach(opt => {
+                    const oBtn = document.createElement('button');
+                    oBtn.className = 'w-full text-right bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-3 text-xs font-bold text-slate-200 transition';
+                    oBtn.textContent = opt.text;
+
+                    oBtn.addEventListener('click', () => {
+                        this.state.totalQuestionsAnswered++;
+                        if (opt.correct) {
+                            this.addScore(10);
+                            this.state.correctAnswersCount++;
+                            this.addScore(20);
+                            this.showFeedback('تصرف حكيم جداً! ✅', opt.feedback, true, () => {
+                                this.loadStage(6);
+                            });
+                        } else {
+                            this.showFeedback('فكر مجدداً ❌', opt.feedback, false);
+                        }
+                    });
+
+                    optContainer.appendChild(oBtn);
+                });
+            }
+
+            renderStage6(container) {
+                let qIdx = 0;
+                const shuffledQs = [...STAGE6_QUESTIONS].sort(() => Math.random() - 0.5);
+
+                const renderTF = () => {
+                    const item = shuffledQs[qIdx];
+                    this.currentStageHint = 'فكر هل هذا التصرف يحترم آداب وقوانين المسجد أم يخالفها؟';
+
+                    container.innerHTML = `
+                        <div class="w-full max-w-xl bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 text-center">
+                            <div class="text-xs text-amber-300 font-bold mb-2">السؤال ${qIdx + 1} من ${shuffledQs.length}</div>
+                            <h3 class="text-lg font-extrabold text-slate-100 mb-8 leading-relaxed">
+                                "${item.q}"
+                            </h3>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <button id="btn-true" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-4 rounded-2xl text-lg transition flex items-center justify-center space-x-2 space-x-reverse">
+                                    <span>✅ صح</span>
+                                </button>
+                                <button id="btn-false" class="bg-red-600 hover:bg-red-500 text-white font-extrabold py-4 rounded-2xl text-lg transition flex items-center justify-center space-x-2 space-x-reverse">
+                                    <span>❌ خطأ</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    const handleAnswer = (userAns) => {
+                        this.state.totalQuestionsAnswered++;
+                        if (userAns === item.a) {
+                            this.addScore(10);
+                            this.state.correctAnswersCount++;
+                            this.showFeedback('صحيح! ✅', item.exp, true, () => {
+                                qIdx++;
+                                if (qIdx < shuffledQs.length) {
+                                    renderTF();
+                                } else {
+                                    this.addScore(20);
+                                    this.loadStage(7);
+                                }
+                            });
+                        } else {
+                            this.showFeedback('خطأ ❌', item.exp, false);
+                        }
+                    };
+
+                    container.querySelector('#btn-true').addEventListener('click', () => handleAnswer(true));
+                    container.querySelector('#btn-false').addEventListener('click', () => handleAnswer(false));
+                };
+
+                renderTF();
+            }
+
+            renderStage7(container) {
+                this.currentStageHint = 'رتب أحداث رحلة المسجد الكاملة ابتداءً من المنزل حتى العودة.';
+                
+                let currentItems = [...STAGE7_EVENTS].sort(() => Math.random() - 0.5);
+
+                container.innerHTML = `
+                    <div class="w-full max-w-2xl text-center">
+                        <p class="text-emerald-200 text-xs md:text-sm font-medium mb-4">
+                            رتب أحداث الرحلة كاملة بالشكل الصحيح (اضغط على عنصرين للتبديل بينهما):
+                        </p>
+
+                        <div class="space-y-2 mb-6" id="s7-list"></div>
+
+                        <button id="btn-check-s7" class="btn-gold py-3 px-8 rounded-xl font-bold text-base">
+                            تأكيد الترتيب 🎯
+                        </button>
+                    </div>
+                `;
+
+                let selectedFirstIndex = null;
+                const listContainer = container.querySelector('#s7-list');
+
+                const renderList = () => {
+                    listContainer.innerHTML = '';
+                    currentItems.forEach((ev, idx) => {
+                        const item = document.createElement('div');
+                        const isSelected = selectedFirstIndex === idx;
+
+                        item.className = `p-3 rounded-xl border text-right font-bold text-xs md:text-sm cursor-pointer flex items-center justify-between transition ${
+                            isSelected ? 'bg-amber-900 border-amber-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800'
+                        }`;
+                        item.innerHTML = `
+                            <span>${ev.text}</span>
+                            <span class="w-6 h-6 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-xs text-amber-400 font-extrabold">
+                                ${idx + 1}
+                            </span>
+                        `;
+
+                        item.addEventListener('click', () => {
+                            if (selectedFirstIndex === null) {
+                                selectedFirstIndex = idx;
+                                renderList();
+                            } else {
+                                // Swap
+                                const temp = currentItems[selectedFirstIndex];
+                                currentItems[selectedFirstIndex] = currentItems[idx];
+                                currentItems[idx] = temp;
+                                selectedFirstIndex = null;
+                                renderList();
+                            }
+                        });
+
+                        listContainer.appendChild(item);
+                    });
+                };
+
+                container.querySelector('#btn-check-s7').addEventListener('click', () => {
+                    let isCorrect = currentItems.every((item, idx) => item.id === idx + 1);
+                    this.state.totalQuestionsAnswered++;
+
+                    if (isCorrect) {
+                        this.addScore(10);
+                        this.state.correctAnswersCount++;
+                        this.addScore(20);
+                        this.showFeedback('ممتاز جداً! 🌟', 'لقد أتقنت التسلسل التربوي الصحيح لرحلة المسجد كاملة.', true, () => {
+                            this.loadStage(8);
+                        });
+                    } else {
+                        this.showFeedback('ترتيب محتاج لتعديل 💡', 'تأكد أن الوضوء في المنزل أولاً، ثم الخروج، ثم المشي، ثم الدخول، ثم الصلاة، ثم الخروج.', false);
+                    }
+                });
+
+                renderList();
+            }
+
+            renderStage8(container) {
+                let sIdx = 0;
+
+                const renderScenario = () => {
+                    const item = STAGE8_SCENARIOS[sIdx];
+                    this.currentStageHint = 'اختر القرار الأكثر حكمة ورفقاً واحتراماً لحرمة بيت الله.';
+
+                    container.innerHTML = `
+                        <div class="w-full max-w-2xl bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 text-right">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs text-amber-300 font-bold bg-amber-950 px-3 py-1 rounded-full border border-amber-500/30">
+                                    الموقف ${sIdx + 1} من ${STAGE8_SCENARIOS.length}
+                                </span>
+                                <span class="text-xs text-emerald-300 font-bold">${item.title}</span>
+                            </div>
+
+                            <p class="text-base font-bold text-slate-100 mb-6 leading-relaxed">
+                                ${item.desc}
+                            </p>
+
+                            <div class="space-y-3" id="s8-options"></div>
+                        </div>
+                    `;
+
+                    const optBox = container.querySelector('#s8-options');
+                    item.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-right bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-3.5 text-xs md:text-sm font-bold text-slate-200 transition';
+                        btn.textContent = opt.text;
+
+                        btn.addEventListener('click', () => {
+                            this.state.totalQuestionsAnswered++;
+                            if (opt.correct) {
+                                this.addScore(10);
+                                this.state.correctAnswersCount++;
+                                this.showFeedback('تصرف راقٍ! ✅', opt.feedback, true, () => {
+                                    sIdx++;
+                                    if (sIdx < STAGE8_SCENARIOS.length) {
+                                        renderScenario();
+                                    } else {
+                                        this.unlockBadge('badgeRespect');
+                                        this.addScore(20);
+                                        this.showFeedback('إنجاز مميز! 🏅', 'لقد تجاوزت كافة التحديات السلوكية بنجاح ووعي كبير.', true, () => {
+                                            this.loadStage(9);
+                                        });
+                                    }
+                                });
+                            } else {
+                                this.showFeedback('حاول مجدداً 💡', opt.feedback, false);
+                            }
+                        });
+
+                        optBox.appendChild(btn);
+                    });
+                };
+
+                renderScenario();
+            }
+
+            renderStage9(container) {
+                let examIdx = 0;
+                let examScore = 0;
+
+                const renderExamQ = () => {
+                    const qData = STAGE9_EXAM[examIdx];
+                    this.currentStageHint = 'اختر الإجابة الأدق بناءً على كل ما تعلمته خلال الرحلة.';
+
+                    container.innerHTML = `
+                        <div class="w-full max-w-2xl bg-slate-900/90 border-2 border-amber-500/50 rounded-2xl p-6 text-right">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs text-amber-300 font-bold bg-amber-950 px-3 py-1 rounded-full border border-amber-500/30">
+                                    السؤال النهائي ${examIdx + 1} / ${STAGE9_EXAM.length}
+                                </span>
+                                <span class="text-xl">🏆 الاختبار النهائي</span>
+                            </div>
+
+                            <p class="text-base font-extrabold text-slate-100 mb-6">
+                                ${qData.q}
+                            </p>
+
+                            <div class="space-y-3" id="s9-options"></div>
+                        </div>
+                    `;
+
+                    const optBox = container.querySelector('#s9-options');
+                    qData.opts.forEach((optText, iIdx) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-right bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-3.5 text-xs md:text-sm font-bold text-slate-200 transition';
+                        btn.textContent = optText;
+
+                        btn.addEventListener('click', () => {
+                            this.state.totalQuestionsAnswered++;
+                            const isCorrect = iIdx === qData.a;
+
+                            if (isCorrect) {
+                                examScore++;
+                                this.addScore(10);
+                                this.state.correctAnswersCount++;
+                            }
+
+                            this.showFeedback(isCorrect ? 'إجابة صحيحة! ✅' : 'إجابة خاطئة ❌', qData.exp, isCorrect, () => {
+                                examIdx++;
+                                if (examIdx < STAGE9_EXAM.length) {
+                                    renderExamQ();
+                                } else {
+                                    // Finish Game!
+                                    this.addScore(50);
+                                    if (examScore >= 8) {
+                                        this.unlockBadge('badgeAmbassador');
+                                    }
+                                    this.finishGame();
+                                }
+                            });
+                        });
+
+                        optBox.appendChild(btn);
+                    });
+                };
+
+                renderExamQ();
+            }
+
+            finishGame() {
+                this.updateUIHeader();
+
+                const accuracy = this.state.totalQuestionsAnswered > 0 
+                    ? Math.round((this.state.correctAnswersCount / this.state.totalQuestionsAnswered) * 100) 
+                    : 100;
+
+                document.getElementById('res-score').textContent = this.state.score;
+                document.getElementById('res-badges').textContent = `${this.state.badges.length} / ${BADGES_DEFINITIONS.length}`;
+                document.getElementById('res-accuracy').textContent = `${accuracy}%`;
+
+                const lvl = this.getLevelInfo();
+                document.getElementById('res-level').textContent = `${lvl.icon} ${lvl.title}`;
+
+                this.showScreen('screen-results');
+            }
+        }
+
+        // Initialize Game On DOM Loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            window.game = new MosqueGame();
+        });
+    </script>
+</body>
+</html>
